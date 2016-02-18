@@ -73,7 +73,7 @@ extension HttpHandlers {
             self.writeFrame(binary, OpCode.Binary)
         }
         
-        private func writeFrame(data: ArraySlice<UInt8>, _ op: OpCode, _ fin: Bool = true) {
+        public func writeFrame(data: ArraySlice<UInt8>, _ op: OpCode, _ fin: Bool = true) {
             let finAndOpCode = encodeFinAndOpCode(fin, op: op)
             let maskAndLngth = encodeLengthAndMaskFlag(UInt64(data.count), false)
             do {

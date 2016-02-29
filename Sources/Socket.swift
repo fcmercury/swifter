@@ -26,6 +26,8 @@ public enum SocketError: ErrorType {
     case RecvFailed(String)
 }
 
+let READ_MAX_LENGTH:Int = 16*1024
+
 public class Socket: Hashable, Equatable {
     
     public class func tcpSocketForListen(port: in_port_t, maxPendingConnection: Int32 = SOMAXCONN) throws -> Socket {
@@ -139,6 +141,22 @@ public class Socket: Hashable, Equatable {
             throw SocketError.RecvFailed(Socket.descriptionOfLastError())
         }
         return buffer[0]
+    }
+    
+    private var readBuffer = [UInt8](count: READ_MAX_LENGTH, repeatedValue: 0)
+    private var readOffset:Int = 0
+    private var readLength:Int = 0
+    public func readNext() throws -> UInt8 {
+        // no more remain to read
+        if readLength == 0 || readOffset < readLength {
+            readOffset = 0
+            let count = recv(self.socketFileDescriptor as Int32, &readBuffer, READ_MAX_LENGTH, 0)
+            if count <= 0 {
+                throw SocketError.RecvFailed(Socket.descriptionOfLastError())
+            }
+            readLength = count
+        }
+        return readBuffer[readOffset++]
     }
     
     private static let CR = UInt8(13)

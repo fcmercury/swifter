@@ -115,8 +115,10 @@ public func demoServer(publicDir: String?) -> HttpServer {
     }
     
     server["/websocket-echo"] = HttpHandlers.websocket({ (session, text) in
+        print(text)
         session.writeText(text)
     }, { (session, binary) in
+        print(binary)
         session.writeBinary(binary)
     })
     

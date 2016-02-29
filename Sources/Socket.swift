@@ -134,21 +134,21 @@ public class Socket: Hashable, Equatable {
         }
     }
     
-    public func read() throws -> UInt8 {
-        var buffer = [UInt8](count: 1, repeatedValue: 0)
-        let next = recv(self.socketFileDescriptor as Int32, &buffer, Int(buffer.count), 0)
-        if next <= 0 {
-            throw SocketError.RecvFailed(Socket.descriptionOfLastError())
-        }
-        return buffer[0]
-    }
+//    public func read() throws -> UInt8 {
+//        var buffer = [UInt8](count: 1, repeatedValue: 0)
+//        let next = recv(self.socketFileDescriptor as Int32, &buffer, Int(buffer.count), 0)
+//        if next <= 0 {
+//            throw SocketError.RecvFailed(Socket.descriptionOfLastError())
+//        }
+//        return buffer[0]
+//    }
     
     private var readBuffer = [UInt8](count: READ_MAX_LENGTH, repeatedValue: 0)
     private var readOffset:Int = 0
     private var readLength:Int = 0
-    public func readNext() throws -> UInt8 {
+    public func read() throws -> UInt8 {
         // no more remain to read
-        if readLength == 0 || readOffset < readLength {
+        if readLength == 0 || readOffset == readLength {
             readOffset = 0
             let count = recv(self.socketFileDescriptor as Int32, &readBuffer, READ_MAX_LENGTH, 0)
             if count <= 0 {

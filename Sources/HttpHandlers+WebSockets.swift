@@ -162,10 +162,8 @@ extension HttpHandlers {
                 len = UInt64(littleEndian: b0 << 54 | b1 << 48 | b2 << 40 | b3 << 32 | b4 << 24 | b5 << 16 | b6 << 8 | b7)
             }
             let mask = [try socket.read(), try socket.read(), try socket.read(), try socket.read()]
-            var i:UInt64 = 0
-            while i < len {
-                frm.payload.append(try socket.readNext() ^ mask[Int(i % 4)])
-                i++
+            for i in 0..<len {
+                frm.payload.append(try socket.read() ^ mask[Int(i % 4)])
             }
             return frm
         }

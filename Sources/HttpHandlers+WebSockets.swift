@@ -36,7 +36,7 @@ extension HttpHandlers {
                         }
                     default: break
                     }
-                    frame.payload = [UInt8]()
+//                    frame.payload = [UInt8]()
                 }
             }
             let secWebSocketAccept = String.toBase64((secWebSocketKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").SHA1())

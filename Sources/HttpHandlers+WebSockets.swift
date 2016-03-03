@@ -57,6 +57,7 @@ extension HttpHandlers {
         }
 
         private let socket: Socket
+        private let writeQueue = dispatch_queue_create("Swifter.writeQueue", DISPATCH_QUEUE_SERIAL)
         
         public init(_ socket: Socket) {
             self.socket = socket
@@ -75,14 +76,17 @@ extension HttpHandlers {
         }
         
         public func writeFrame(data: ArraySlice<UInt8>, _ op: OpCode, _ fin: Bool = true) {
-            let finAndOpCode = encodeFinAndOpCode(fin, op: op)
-            let maskAndLngth = encodeLengthAndMaskFlag(UInt64(data.count), false)
-            do {
-                try self.socket.writeUInt8([finAndOpCode])
-                try self.socket.writeUInt8(maskAndLngth)
-                try self.socket.writeUInt8(data)
-            } catch {
-                print(error)
+            dispatch_async(writeQueue){
+                let finAndOpCode = self.encodeFinAndOpCode(fin, op: op)
+                let maskAndLngth = self.encodeLengthAndMaskFlag(UInt64(data.count), false)
+                do {
+                    try self.socket.writeUInt8([finAndOpCode])
+                    try self.socket.writeUInt8(maskAndLngth)
+                    try self.socket.writeUInt8(data)
+                } catch {
+                    print(error)
+                    
+                }
             }
         }
         

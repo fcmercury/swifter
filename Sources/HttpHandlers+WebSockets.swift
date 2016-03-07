@@ -11,7 +11,7 @@ extension HttpHandlers {
     
     public class func websocket(
             text: ((WebSocketSession, String) -> Void)?,
-        _ binary: ((WebSocketSession, [UInt8]) -> Void)?) -> (HttpRequest -> HttpResponse) {
+        _ binary: ((WebSocketSession, [UInt8]) -> Void)?, _ validator: ((HttpRequest) -> Bool)? = nil) -> (HttpRequest -> HttpResponse) {
         return { r in
             guard r.headers["upgrade"] == "websocket" else {
                 return .BadRequest(.Text("Invalid value of 'Upgrade' header: \(r.headers["upgrade"])"))
@@ -22,6 +22,12 @@ extension HttpHandlers {
             guard let secWebSocketKey = r.headers["sec-websocket-key"] else {
                 return .BadRequest(.Text("Invalid value of 'Sec-Websocket-Key' header: \(r.headers["sec-websocket-key"])"))
             }
+            
+            if validator != nil && !validator!(r) {
+                return .BadRequest(.Text("Invalid value as validation failed for headers: \(r.headers)"))
+            }
+            
+            
             let protocolSessionClosure: (Socket -> Void) = { socket in
                 let session = WebSocketSession(socket)
                 while let frame = try? session.readFrame(socket) {
@@ -85,7 +91,6 @@ extension HttpHandlers {
                     try self.socket.writeUInt8(data)
                 } catch {
                     print(error)
-                    
                 }
             }
         }

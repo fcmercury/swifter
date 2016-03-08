@@ -24,7 +24,7 @@ extension HttpHandlers {
             }
             
             if validator != nil && !validator!(r) {
-                return .BadRequest(.Text("Invalid value as validation failed for headers: \(r.headers)"))
+                return .Unauthorized
             }
             
             

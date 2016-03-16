@@ -69,20 +69,21 @@ extension HttpHandlers {
             self.socket = socket
         }
         
-        public func writeText(text: String) -> Void {
-            self.writeFrame(ArraySlice(text.utf8), OpCode.Text)
+        public func writeText(text: String) -> Bool {
+            return self.writeFrame(ArraySlice(text.utf8), OpCode.Text)
         }
     
-        public func writeBinary(binary: [UInt8]) -> Void {
-            self.writeBinary(ArraySlice(binary))
+        public func writeBinary(binary: [UInt8]) -> Bool {
+            return self.writeBinary(ArraySlice(binary))
         }
         
-        public func writeBinary(binary: ArraySlice<UInt8>) -> Void {
-            self.writeFrame(binary, OpCode.Binary)
+        public func writeBinary(binary: ArraySlice<UInt8>) -> Bool {
+            return self.writeFrame(binary, OpCode.Binary)
         }
         
-        public func writeFrame(data: ArraySlice<UInt8>, _ op: OpCode, _ fin: Bool = true) {
-            dispatch_async(writeQueue){
+        public func writeFrame(data: ArraySlice<UInt8>, _ op: OpCode, _ fin: Bool = true) -> Bool {
+            var ret: Bool = true
+            dispatch_sync(writeQueue){
                 let finAndOpCode = self.encodeFinAndOpCode(fin, op: op)
                 let maskAndLngth = self.encodeLengthAndMaskFlag(UInt64(data.count), false)
                 do {
@@ -91,8 +92,10 @@ extension HttpHandlers {
                     try self.socket.writeUInt8(data)
                 } catch {
                     print(error)
+                    ret = false
                 }
             }
+            return ret
         }
         
         private func encodeFinAndOpCode(fin: Bool, op: OpCode) -> UInt8 {

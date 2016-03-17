@@ -84,17 +84,26 @@ public class HttpServerIO {
     
     private struct InnerWriteContext: HttpResponseBodyWriter {
         let socket: Socket
-        func write(data: [UInt8]) {
-            write(ArraySlice(data))
+//        let writeQueue = dispatch_queue_create("Swifter.httpwriteQueue", DISPATCH_QUEUE_SERIAL)
+        func write(data: [UInt8]) -> Bool {
+            return write(ArraySlice(data))
         }
-        func write(data: ArraySlice<UInt8>) {
-            do {
-                try socket.writeUInt8(data)
-            } catch {
-                print("\(error)")
-            }
+        func write(data: ArraySlice<UInt8>) -> Bool {
+            var ret: Bool = true
+//            dispatch_sync(writeQueue){
+                do {
+                    try self.socket.writeUInt8(data)
+                } catch {
+                    ret = false
+                    print("\(error)")
+                }
+//            }
+            return ret
         }
     }
+    
+   
+    
     
     private func respond(socket: Socket, response: HttpResponse, keepAlive: Bool) throws -> Bool {
         try socket.writeUTF8("HTTP/1.1 \(response.statusCode()) \(response.reasonPhrase())\r\n")

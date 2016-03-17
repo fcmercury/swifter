@@ -63,7 +63,7 @@ extension HttpHandlers {
         }
 
         private let socket: Socket
-        private let writeQueue = dispatch_queue_create("Swifter.writeQueue", DISPATCH_QUEUE_SERIAL)
+        private let writeQueue = dispatch_queue_create("Swifter.webswriteQueue", DISPATCH_QUEUE_SERIAL)
         
         public init(_ socket: Socket) {
             self.socket = socket

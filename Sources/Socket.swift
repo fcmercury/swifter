@@ -127,6 +127,7 @@ public class Socket: Hashable, Equatable {
                     let s = write(self.socketFileDescriptor, $0.baseAddress + sent, Int(data.count - sent))
                 #endif
                 if s <= 0 {
+                    shutdwn()
                     throw SocketError.WriteFailed(Socket.descriptionOfLastError())
                 }
                 sent += s
@@ -152,6 +153,7 @@ public class Socket: Hashable, Equatable {
             readOffset = 0
             let count = recv(self.socketFileDescriptor as Int32, &readBuffer, READ_MAX_LENGTH, 0)
             if count <= 0 {
+                shutdwn()
                 throw SocketError.RecvFailed(Socket.descriptionOfLastError())
             }
             readLength = count
